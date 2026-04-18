@@ -166,7 +166,7 @@ O `IdUsuario` é extraído do token JWT — nunca enviado pelo cliente.
 ```
 Response `200 OK`:
 ```json
-{ "token": "eyJ...", "expiraEm": "2026-04-19T14:00:00" }
+{ "token": "eyJ...", "dataExpiracao": "2026-04-19T14:00:00" }
 ```
 
 #### Despesas
@@ -366,17 +366,21 @@ ng build --output-path ../../backend/MinhasFinancas.Api/wwwroot
 
 ## Sequência de implementação
 
-1. Criar solução .NET e projeto Web API
-2. Definir entidades e `AppDbContext`, gerar migration inicial
-3. Implementar `AutenticacaoController` (registrar + login com JWT)
-4. Implementar controllers das tabelas de apoio (Marcas, Produtos, Estabelecimentos, Categorias)
-5. Implementar `DespesasController` com todos os endpoints incluindo resumo
-6. Testar a API com arquivo `.http`
-7. Criar projeto Angular com `ng new`
-8. Criar models, enums e services
-9. Implementar `AutenticacaoService`, `AutenticacaoInterceptor` e `AutenticacaoGuard`
-10. Construir telas de login e registro
-11. Construir `ListaDespesasComponent` + `FiltroDespesasComponent`
-12. Construir `FormularioDespesaComponent`
-13. Construir `PainelComponent`
-14. Testar fluxo completo end-to-end
+### Backend
+- [x] Criar solução .NET e projeto Web API
+- [x] Definir entidades e `AppDbContext`, gerar migration inicial
+- [x] Alimentar banco com dados mockados (`Data/Seed.cs`)
+- [ ] Implementar `AutenticacaoController` (registrar + login com JWT)
+- [ ] Implementar controllers das tabelas de apoio (Marcas, Produtos, Estabelecimentos, Categorias)
+- [ ] Implementar `DespesasController` com todos os endpoints incluindo resumo
+- [ ] Testar a API com arquivo `.http`
+
+### Frontend
+- [ ] Criar projeto Angular com `ng new`
+- [ ] Criar models, enums e services
+- [ ] Implementar `AutenticacaoService`, `AutenticacaoInterceptor` e `AutenticacaoGuard`
+- [ ] Construir telas de login e registro
+- [ ] Construir `ListaDespesasComponent` + `FiltroDespesasComponent`
+- [ ] Construir `FormularioDespesaComponent`
+- [ ] Construir `PainelComponent`
+- [ ] Testar fluxo completo end-to-end
