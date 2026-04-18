@@ -1,0 +1,51 @@
+# ─── .NET ────────────────────────────────────────────────────────────────────
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+*.rsuser
+*.dbmdl
+*.jfm
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Publicação
+publish/
+**/Properties/launchSettings.json
+
+# ─── Banco de dados ──────────────────────────────────────────────────────────
+banco/
+*.db
+*.db-shm
+*.db-wal
+
+# ─── Segredos e configurações locais ─────────────────────────────────────────
+appsettings.*.json
+!appsettings.json
+*.env
+.env
+secrets.json
+**/UserSecrets/
+
+# ─── Angular / Node ──────────────────────────────────────────────────────────
+node_modules/
+dist/
+.angular/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tgz
+.npm
+
+# ─── IDEs ────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
