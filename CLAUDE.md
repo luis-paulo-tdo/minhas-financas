@@ -376,10 +376,10 @@ ng build --output-path ../../backend/MinhasFinancas.Api/wwwroot
 - [ ] Testar a API com arquivo `.http`
 
 ### Frontend
-- [ ] Criar projeto Angular com `ng new`
-- [ ] Criar models, enums e services
-- [ ] Implementar `AutenticacaoService`, `AutenticacaoInterceptor` e `AutenticacaoGuard`
-- [ ] Construir telas de login e registro
+- [x] Criar projeto Angular com `ng new`
+- [x] Criar models e services base (`LoginRequest`, `LoginResponse`, `Usuario`)
+- [x] Implementar `AutenticacaoService`, `AutenticacaoInterceptor` e `AutenticacaoGuard`
+- [x] Construir tela de login e shell principal com menu
 - [ ] Construir `ListaDespesasComponent` + `FiltroDespesasComponent`
 - [ ] Construir `FormularioDespesaComponent`
 - [ ] Construir `PainelComponent`
