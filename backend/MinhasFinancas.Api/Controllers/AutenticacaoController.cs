@@ -50,7 +50,7 @@ public class AutenticacaoController(AppDbContext db, IConfiguration config) : Co
     {
         var jwt      = config.GetSection("Jwt");
         var chave    = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Chave"]!));
-        var expiraEm = DateTime.UtcNow.AddHours(int.Parse(jwt["ExpiracaoHoras"]!));
+        var dataExpiracao = DateTime.UtcNow.AddHours(int.Parse(jwt["ExpiracaoHoras"]!));
 
         var claims = new[]
         {
@@ -64,14 +64,14 @@ public class AutenticacaoController(AppDbContext db, IConfiguration config) : Co
             issuer:             jwt["Emissor"],
             audience:           jwt["Audiencia"],
             claims:             claims,
-            expires:            expiraEm,
+            expires:            dataExpiracao,
             signingCredentials: new SigningCredentials(chave, SecurityAlgorithms.HmacSha256)
         );
 
         return new LoginResponse
         {
             Token    = new JwtSecurityTokenHandler().WriteToken(token),
-            DataExpiracao = expiraEm,
+            DataExpiracao = dataExpiracao,
             Nome     = usuario.Nome,
             Email    = usuario.Email
         };
