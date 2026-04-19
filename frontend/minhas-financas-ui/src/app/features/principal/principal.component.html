@@ -1,0 +1,27 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">💰</span>
+      <span class="logo-texto">Minhas Finanças</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/despesas" routerLinkActive="ativo">
+        <span class="nav-icon">📋</span>
+        <span>Despesas</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-rodape">
+      <div class="usuario-info">
+        <span class="usuario-nome">{{ auth.usuario()?.nome }}</span>
+        <span class="usuario-email">{{ auth.usuario()?.email }}</span>
+      </div>
+      <button class="btn-sair" (click)="auth.logout()">Sair</button>
+    </div>
+  </aside>
+
+  <main class="conteudo">
+    <router-outlet />
+  </main>
+</div>
