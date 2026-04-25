@@ -9,6 +9,8 @@ export const routes: Routes = [
     canActivate: [autenticacaoGuard],
     children: [
       { path: 'despesas', loadComponent: () => import('./features/despesas/despesas.component').then(m => m.DespesasComponent) },
+      { path: 'estabelecimentos', loadComponent: () => import('./features/estabelecimentos/estabelecimentos.component').then(m => m.EstabelecimentosComponent) },
+      { path: 'marcas', loadComponent: () => import('./features/marcas/marcas.component').then(m => m.MarcasComponent) },
       { path: '', redirectTo: 'despesas', pathMatch: 'full' }
     ]
   },
