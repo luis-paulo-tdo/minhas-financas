@@ -367,20 +367,39 @@ ng build --output-path ../../backend/MinhasFinancas.Api/wwwroot
 ## Sequência de implementação
 
 ### Backend
-- [x] Criar solução .NET e projeto Web API
+- [x] Criar solução .NET e projeto Web API (net8.0)
 - [x] Definir entidades e `AppDbContext`, gerar migration inicial
 - [x] Alimentar banco com dados mockados (`Data/Seed.cs`)
-- [ ] Implementar `AutenticacaoController` (registrar + login com JWT)
-- [ ] Implementar controllers das tabelas de apoio (Marcas, Produtos, Estabelecimentos, Categorias)
-- [ ] Implementar `DespesasController` com todos os endpoints incluindo resumo
-- [ ] Testar a API com arquivo `.http`
+- [x] Implementar `AutenticacaoController` (registrar + login com JWT)
+- [x] Configurar Swagger UI com suporte a Bearer token (abre automaticamente ao rodar)
+- [x] Criar collection Postman com login pré-configurado e script de captura de token
+- [x] Implementar `CategoriasController` (somente leitura — valores fixos)
+- [x] Implementar `EstabelecimentosController` (CRUD)
+- [x] Implementar `MarcasController` (CRUD)
+- [x] Implementar `ProdutosController` (CRUD — com FK para Marca)
+- [ ] Implementar `DespesasController`
+  - [ ] `GET /despesas` — listagem com filtros (categoria, estabelecimento, produto, período) e paginação
+  - [ ] `GET /despesas/{id}` — detalhe
+  - [ ] `POST /despesas` — criar
+  - [ ] `PUT /despesas/{id}` — editar
+  - [ ] `DELETE /despesas/{id}` — excluir
+  - [ ] `GET /despesas/resumo` — totais por categoria (dashboard)
+- [ ] Atualizar collection Postman (Produtos + Despesas)
 
 ### Frontend
 - [x] Criar projeto Angular com `ng new`
 - [x] Criar models e services base (`LoginRequest`, `LoginResponse`, `Usuario`)
 - [x] Implementar `AutenticacaoService`, `AutenticacaoInterceptor` e `AutenticacaoGuard`
-- [x] Construir tela de login e shell principal com menu
-- [ ] Construir `ListaDespesasComponent` + `FiltroDespesasComponent`
-- [ ] Construir `FormularioDespesaComponent`
-- [ ] Construir `PainelComponent`
+- [x] Construir tela de login com validação e tratamento de erros via signals
+- [x] Construir shell principal com sidebar, menu e logout
+- [x] Configurar título da página e favicon personalizado
+- [x] Extrair estilos de tabela/CRUD para `shared/styles/_crud-tabela.scss`
+- [x] Construir tela de CRUD de Estabelecimentos
+- [x] Construir tela de CRUD de Marcas
+- [x] Construir tela de CRUD de Produtos (select de Marca, busca por nome)
+- [ ] Construir tela de Despesas
+  - [ ] Listagem com tabela paginada
+  - [ ] Filtros: período, categoria, estabelecimento, produto
+  - [ ] Formulário de criação e edição (selects encadeados: Marca → Produto)
+- [ ] Construir `PainelComponent` (dashboard com cards e gráfico por categoria)
 - [ ] Testar fluxo completo end-to-end

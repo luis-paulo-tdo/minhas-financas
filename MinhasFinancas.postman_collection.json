@@ -83,6 +83,229 @@
           }
         }
       ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/categorias", "host": ["{{baseUrl}}"], "path": ["categorias"] }
+          }
+        },
+        {
+          "name": "Obter por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/categorias/1", "host": ["{{baseUrl}}"], "path": ["categorias", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Estabelecimentos",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/estabelecimentos", "host": ["{{baseUrl}}"], "path": ["estabelecimentos"] }
+          }
+        },
+        {
+          "name": "Listar com busca",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/estabelecimentos?busca=super",
+              "host": ["{{baseUrl}}"],
+              "path": ["estabelecimentos"],
+              "query": [{ "key": "busca", "value": "super" }]
+            }
+          }
+        },
+        {
+          "name": "Obter por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/estabelecimentos/1", "host": ["{{baseUrl}}"], "path": ["estabelecimentos", "1"] }
+          }
+        },
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/estabelecimentos", "host": ["{{baseUrl}}"], "path": ["estabelecimentos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Mercado Municipal\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/estabelecimentos/1", "host": ["{{baseUrl}}"], "path": ["estabelecimentos", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Supermercado Extra Atualizado\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Excluir",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/estabelecimentos/1", "host": ["{{baseUrl}}"], "path": ["estabelecimentos", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Marcas",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/marcas", "host": ["{{baseUrl}}"], "path": ["marcas"] }
+          }
+        },
+        {
+          "name": "Listar com busca",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/marcas?busca=nes",
+              "host": ["{{baseUrl}}"],
+              "path": ["marcas"],
+              "query": [{ "key": "busca", "value": "nes" }]
+            }
+          }
+        },
+        {
+          "name": "Obter por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/marcas/1", "host": ["{{baseUrl}}"], "path": ["marcas", "1"] }
+          }
+        },
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/marcas", "host": ["{{baseUrl}}"], "path": ["marcas"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Unilever\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/marcas/1", "host": ["{{baseUrl}}"], "path": ["marcas", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Nestlé Brasil\"\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Excluir",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/marcas/1", "host": ["{{baseUrl}}"], "path": ["marcas", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Produtos",
+      "item": [
+        {
+          "name": "Listar",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/produtos", "host": ["{{baseUrl}}"], "path": ["produtos"] }
+          }
+        },
+        {
+          "name": "Listar com busca",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/produtos?busca=arroz",
+              "host": ["{{baseUrl}}"],
+              "path": ["produtos"],
+              "query": [{ "key": "busca", "value": "arroz" }]
+            }
+          }
+        },
+        {
+          "name": "Listar por marca",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/produtos?idMarca=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["produtos"],
+              "query": [{ "key": "idMarca", "value": "2" }]
+            }
+          }
+        },
+        {
+          "name": "Obter por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/produtos/1", "host": ["{{baseUrl}}"], "path": ["produtos", "1"] }
+          }
+        },
+        {
+          "name": "Criar",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/produtos", "host": ["{{baseUrl}}"], "path": ["produtos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Leite Condensado 395g\",\n  \"idMarca\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Atualizar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/produtos/1", "host": ["{{baseUrl}}"], "path": ["produtos", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Arroz Tipo 1 5kg\",\n  \"idMarca\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Excluir",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/produtos/1", "host": ["{{baseUrl}}"], "path": ["produtos", "1"] }
+          }
+        }
+      ]
     }
   ]
 }
