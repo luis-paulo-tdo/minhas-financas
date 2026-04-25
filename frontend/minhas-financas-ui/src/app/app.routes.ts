@@ -11,6 +11,7 @@ export const routes: Routes = [
       { path: 'despesas', loadComponent: () => import('./features/despesas/despesas.component').then(m => m.DespesasComponent) },
       { path: 'estabelecimentos', loadComponent: () => import('./features/estabelecimentos/estabelecimentos.component').then(m => m.EstabelecimentosComponent) },
       { path: 'marcas', loadComponent: () => import('./features/marcas/marcas.component').then(m => m.MarcasComponent) },
+      { path: 'produtos', loadComponent: () => import('./features/produtos/produtos.component').then(m => m.ProdutosComponent) },
       { path: '', redirectTo: 'despesas', pathMatch: 'full' }
     ]
   },
