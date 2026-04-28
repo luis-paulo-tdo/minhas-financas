@@ -12,7 +12,9 @@ export const routes: Routes = [
       { path: 'estabelecimentos', loadComponent: () => import('./features/estabelecimentos/estabelecimentos.component').then(m => m.EstabelecimentosComponent) },
       { path: 'marcas', loadComponent: () => import('./features/marcas/marcas.component').then(m => m.MarcasComponent) },
       { path: 'produtos', loadComponent: () => import('./features/produtos/produtos.component').then(m => m.ProdutosComponent) },
-      { path: '', redirectTo: 'despesas', pathMatch: 'full' }
+      { path: 'linhas', loadComponent: () => import('./features/linhas/linhas.component').then(m => m.LinhasComponent) },
+      { path: 'painel', loadComponent: () => import('./features/painel/painel.component').then(m => m.PainelComponent) },
+      { path: '', redirectTo: 'painel', pathMatch: 'full' }
     ]
   },
   { path: '**', redirectTo: '' }

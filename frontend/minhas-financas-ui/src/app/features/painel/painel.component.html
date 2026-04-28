@@ -1,0 +1,109 @@
+<div class="pagina">
+  <div class="pagina-cabecalho">
+    <div>
+      <h2>Painel</h2>
+      <p class="subtitulo">Visão geral das suas finanças no período.</p>
+    </div>
+
+    <div class="filtro-periodo">
+      <div class="filtro-campo">
+        <label>De</label>
+        <input type="date" [(ngModel)]="de" />
+      </div>
+      <div class="filtro-campo">
+        <label>Até</label>
+        <input type="date" [(ngModel)]="ate" />
+      </div>
+      <button class="btn-primario" (click)="carregar()" [disabled]="carregando()">
+        {{ carregando() ? 'Carregando...' : 'Aplicar' }}
+      </button>
+    </div>
+  </div>
+
+  @if (carregando()) {
+    <div class="estado-vazio">Carregando...</div>
+  }
+
+  @if (dados(); as d) {
+    <!-- Cards de resumo -->
+    <div class="cards-grade">
+      <div class="card-resumo card-total">
+        <span class="card-label">Total gasto</span>
+        <span class="card-valor">{{ formatarValor(d.resumo.totalGeral) }}</span>
+      </div>
+      <div class="card-resumo card-essencial">
+        <span class="card-label">Essencial</span>
+        <span class="card-valor">{{ formatarValor(d.resumo.totalEssencial) }}</span>
+        <span class="card-pct">{{ porcentagem(d.resumo.totalEssencial, d.resumo.totalGeral) }}</span>
+      </div>
+      <div class="card-resumo card-lazer">
+        <span class="card-label">Lazer</span>
+        <span class="card-valor">{{ formatarValor(d.resumo.totalLazer) }}</span>
+        <span class="card-pct">{{ porcentagem(d.resumo.totalLazer, d.resumo.totalGeral) }}</span>
+      </div>
+      <div class="card-resumo card-investimento">
+        <span class="card-label">Investimento</span>
+        <span class="card-valor">{{ formatarValor(d.resumo.totalInvestimento) }}</span>
+        <span class="card-pct">{{ porcentagem(d.resumo.totalInvestimento, d.resumo.totalGeral) }}</span>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="graficos-grade">
+      <div class="card grafico-barra">
+        <h3 class="grafico-titulo">Evolução mensal por categoria</h3>
+        <div class="grafico-wrapper">
+          <canvas #canvasBarra></canvas>
+        </div>
+      </div>
+      <div class="card grafico-donut">
+        <h3 class="grafico-titulo">Proporção por categoria</h3>
+        <div class="grafico-wrapper">
+          <canvas #canvasDonut></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rankings -->
+    <div class="rankings-grade">
+      <div class="card">
+        <h3 class="ranking-titulo">Top 5 Estabelecimentos</h3>
+        @if (d.topEstabelecimentos.length === 0) {
+          <p class="ranking-vazio">Nenhum dado no período.</p>
+        } @else {
+          <ul class="ranking-lista">
+            @for (item of d.topEstabelecimentos; track item.nome; let i = $index) {
+              <li>
+                <span class="ranking-pos">{{ i + 1 }}</span>
+                <span class="ranking-nome">{{ item.nome }}</span>
+                <span class="ranking-valor">{{ formatarValor(item.total) }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="card">
+        <h3 class="ranking-titulo">Top 5 Produtos</h3>
+        @if (d.topProdutos.length === 0) {
+          <p class="ranking-vazio">Nenhum dado no período.</p>
+        } @else {
+          <ul class="ranking-lista">
+            @for (item of d.topProdutos; track item.nome; let i = $index) {
+              <li>
+                <span class="ranking-pos">{{ i + 1 }}</span>
+                <div class="ranking-nome-grupo">
+                  <span class="ranking-nome">{{ item.nome }}</span>
+                  @if (item.detalhe) {
+                    <span class="ranking-detalhe">{{ item.detalhe }}</span>
+                  }
+                </div>
+                <span class="ranking-valor">{{ formatarValor(item.total) }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  }
+</div>
