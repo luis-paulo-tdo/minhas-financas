@@ -10,10 +10,11 @@ export class ProdutoService {
 
   constructor(private http: HttpClient) {}
 
-  listar(busca?: string, idMarca?: number): Observable<Produto[]> {
+  listar(busca?: string, idMarca?: number, idLinhaProduto?: number): Observable<Produto[]> {
     let params = new HttpParams();
-    if (busca)   params = params.set('busca', busca);
-    if (idMarca) params = params.set('idMarca', idMarca);
+    if (busca)          params = params.set('busca', busca);
+    if (idMarca)        params = params.set('idMarca', idMarca);
+    if (idLinhaProduto) params = params.set('idLinhaProduto', idLinhaProduto);
     return this.http.get<Produto[]>(this.url, { params });
   }
 
