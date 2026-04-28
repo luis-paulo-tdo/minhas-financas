@@ -1,0 +1,123 @@
+<div class="pagina">
+  <div class="pagina-cabecalho">
+    <div>
+      <h2>Linhas de Produto</h2>
+      <p class="subtitulo">Gerencie as linhas de produto vinculadas às marcas.</p>
+    </div>
+    <button class="btn-primario" (click)="abrirCriar()">+ Nova Linha</button>
+  </div>
+
+  <div class="card">
+    <div class="barra-busca">
+      <input type="text" placeholder="Buscar por nome..." (input)="onBusca($event)" />
+    </div>
+
+    @if (carregando()) {
+      <div class="estado-vazio">Carregando...</div>
+    } @else if (lista().length === 0) {
+      <div class="estado-vazio">Nenhuma linha de produto encontrada.</div>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Marca</th>
+            <th class="col-acoes">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of lista(); track item.id; let par = $even) {
+            <tr [class.par]="par">
+              <td>{{ item.nome }}</td>
+              <td>{{ item.nomeMarca }}</td>
+              <td class="col-acoes">
+                <div>
+                  <button class="btn-acao" (click)="abrirEditar(item)" title="Editar">✏️</button>
+                  <button class="btn-acao" (click)="pedirConfirmacaoExclusao(item.id)" title="Excluir">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+@if (modalAberto()) {
+  <div class="overlay" (click)="fecharModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-cabecalho">
+        <h3>{{ editandoId ? 'Editar' : 'Nova' }} Linha de Produto</h3>
+        <button class="btn-fechar" (click)="fecharModal()">✕</button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="campo">
+          <label for="nome">Nome</label>
+          <input id="nome" type="text" formControlName="nome" placeholder="Ex: Linha Premium" autofocus />
+          @if (form.get('nome')?.invalid && form.get('nome')?.touched) {
+            <span class="erro-campo">Nome deve ter pelo menos 2 caracteres.</span>
+          }
+        </div>
+
+        <div class="campo">
+          <label>Marca</label>
+          <div class="combo-wrapper">
+            <input
+              type="text"
+              class="combo-input"
+              placeholder="Digite para buscar..."
+              [value]="buscaMarca()"
+              (input)="buscaMarca.set($any($event.target).value)"
+              (focus)="abrirDropdownMarca()"
+              (blur)="fecharDropdownMarca()"
+              autocomplete="off"
+            />
+            @if (dropdownMarcaAberto()) {
+              <ul class="combo-lista">
+                @for (marca of marcasFiltradas(); track marca.id) {
+                  <li (mousedown)="selecionarMarca(marca)">{{ marca.nome }}</li>
+                } @empty {
+                  <li class="combo-vazio">Nenhuma marca encontrada.</li>
+                }
+              </ul>
+            }
+          </div>
+          @if (form.get('idMarca')?.invalid && form.get('idMarca')?.touched) {
+            <span class="erro-campo">Selecione uma marca.</span>
+          }
+        </div>
+
+        @if (erro()) {
+          <div class="erro-form">{{ erro() }}</div>
+        }
+
+        <div class="modal-rodape">
+          <button type="button" class="btn-secundario" (click)="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-primario" [disabled]="salvando()">
+            {{ salvando() ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (confirmarExclusaoId() !== null) {
+  <div class="overlay" (click)="cancelarExclusao()">
+    <div class="modal modal-confirmacao" (click)="$event.stopPropagation()">
+      <h3>Confirmar exclusão</h3>
+      <p>Deseja realmente excluir esta linha de produto? Esta ação não pode ser desfeita.</p>
+      @if (erroExclusao()) {
+        <div class="erro-form">{{ erroExclusao() }}</div>
+      }
+      <div class="modal-rodape">
+        <button class="btn-secundario" (click)="cancelarExclusao()">Cancelar</button>
+        @if (!erroExclusao()) {
+          <button class="btn-perigo" (click)="confirmarExclusao()">Excluir</button>
+        }
+      </div>
+    </div>
+  </div>
+}
