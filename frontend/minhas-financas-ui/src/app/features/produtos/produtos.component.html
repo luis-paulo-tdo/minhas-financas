@@ -22,6 +22,7 @@
           <tr>
             <th>Nome</th>
             <th>Marca</th>
+            <th>Linha</th>
             <th class="col-acoes">Ações</th>
           </tr>
         </thead>
@@ -29,7 +30,8 @@
           @for (item of lista(); track item.id; let par = $even) {
             <tr [class.par]="par">
               <td>{{ item.nome }}</td>
-              <td>{{ item.nomeMarca }}</td>
+              <td>{{ item.nomeMarca ?? '—' }}</td>
+              <td>{{ item.nomeLinhaProduto ?? (item.idMarca ? 'Original' : '—') }}</td>
               <td class="col-acoes">
                 <div>
                   <button class="btn-acao" (click)="abrirEditar(item)" title="Editar">✏️</button>
@@ -62,7 +64,7 @@
         </div>
 
         <div class="campo">
-          <label for="buscaMarcaInput">Marca</label>
+          <label for="buscaMarcaInput">Marca <span class="label-opcional">(opcional)</span></label>
           <div class="combo-wrapper">
             <input
               id="buscaMarcaInput"
@@ -85,9 +87,35 @@
               </ul>
             }
           </div>
-          @if (form.get('idMarca')?.invalid && form.get('idMarca')?.touched) {
-            <span class="erro-campo">Selecione uma marca.</span>
-          }
+        </div>
+
+        <div class="campo">
+          <label>Linha <span class="label-opcional">(opcional)</span></label>
+          <div class="combo-wrapper">
+            <input
+              type="text"
+              class="combo-input"
+              placeholder="{{ form.get('idMarca')?.value ? 'Digite para buscar...' : 'Selecione uma marca primeiro' }}"
+              [value]="buscaLinha()"
+              [disabled]="!form.get('idMarca')?.value"
+              (input)="buscaLinha.set($any($event.target).value)"
+              (focus)="abrirDropdownLinha()"
+              (blur)="fecharDropdownLinha()"
+              autocomplete="off"
+            />
+            @if (form.get('idLinhaProduto')?.value) {
+              <button type="button" class="combo-limpar" (click)="limparLinha()" title="Remover linha">✕</button>
+            }
+            @if (dropdownLinhaAberto()) {
+              <ul class="combo-lista">
+                @for (linha of linhasFiltradas(); track linha.id) {
+                  <li (mousedown)="selecionarLinha(linha)">{{ linha.nome }}</li>
+                } @empty {
+                  <li class="combo-vazio">Nenhuma linha encontrada para esta marca.</li>
+                }
+              </ul>
+            }
+          </div>
         </div>
 
         @if (erro()) {
@@ -110,9 +138,14 @@
     <div class="modal modal-confirmacao" (click)="$event.stopPropagation()">
       <h3>Confirmar exclusão</h3>
       <p>Deseja realmente excluir este produto? Esta ação não pode ser desfeita.</p>
+      @if (erroExclusao()) {
+        <div class="erro-form">{{ erroExclusao() }}</div>
+      }
       <div class="modal-rodape">
         <button class="btn-secundario" (click)="cancelarExclusao()">Cancelar</button>
-        <button class="btn-perigo" (click)="confirmarExclusao()">Excluir</button>
+        @if (!erroExclusao()) {
+          <button class="btn-perigo" (click)="confirmarExclusao()">Excluir</button>
+        }
       </div>
     </div>
   </div>

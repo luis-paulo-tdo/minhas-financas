@@ -10,6 +10,12 @@
   font-weight: 600;
 }
 
+.label-opcional {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 11px;
+}
+
 .combo-wrapper {
   position: relative;
 
@@ -25,6 +31,22 @@
     box-sizing: border-box;
 
     &:focus { border-color: #4f46e5; }
+  }
+
+  .combo-limpar {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 1;
+
+    &:hover { color: #374151; }
   }
 
   .combo-lista {
