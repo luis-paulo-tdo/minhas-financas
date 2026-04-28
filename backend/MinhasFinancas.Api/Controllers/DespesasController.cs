@@ -60,11 +60,15 @@ public class DespesasController(AppDbContext db) : ControllerBase
                 IdEstabelecimento   = d.IdEstabelecimento,
                 NomeEstabelecimento = d.Estabelecimento.Nome,
                 IdProduto           = d.IdProduto,
-                NomeProduto         = d.Produto.Nome,
-                IdMarca             = d.Produto.IdMarca,
-                NomeMarca           = d.Produto.Marca.Nome,
+                NomeProduto         = d.Produto != null ? d.Produto.Nome : null,
+                IdMarca             = d.Produto != null ? d.Produto.IdMarca : (int?)null,
+                NomeMarca           = d.Produto != null ? d.Produto.Marca.Nome : null,
+                IdLinhaProduto      = d.Produto != null ? d.Produto.IdLinhaProduto : (int?)null,
+                NomeLinhaProduto    = d.Produto != null ? d.Produto.LinhaProduto.Nome : null,
                 Descricao           = d.Descricao,
                 Valor               = d.Valor,
+                PrecoGranel         = d.PrecoGranel,
+                UnidadeGranel       = d.UnidadeGranel,
                 DataCriacao         = d.DataCriacao
             })
             .ToListAsync();
@@ -75,6 +79,82 @@ public class DespesasController(AppDbContext db) : ControllerBase
             Total        = total,
             Pagina       = pagina,
             TotalPaginas = (int)Math.Ceiling((double)total / tamanhoPagina)
+        });
+    }
+
+    [HttpGet("dashboard")]
+    public async Task<ActionResult<DashboardResponse>> Dashboard(
+        [FromQuery] DateTime? de,
+        [FromQuery] DateTime? ate)
+    {
+        var query = db.Despesas
+            .Where(d => d.IdUsuario == IdUsuario)
+            .AsQueryable();
+
+        if (de.HasValue)
+            query = query.Where(d => d.DataCriacao >= de.Value);
+        if (ate.HasValue)
+            query = query.Where(d => d.DataCriacao <= ate.Value.AddDays(1).AddTicks(-1));
+
+        var despesas = await query
+            .Select(d => new
+            {
+                d.Valor,
+                NomeCategoria       = d.Categoria.Nome,
+                NomeEstabelecimento = d.Estabelecimento.Nome,
+                NomeProduto         = d.Produto != null ? d.Produto.Nome         : null,
+                NomeMarca           = d.Produto != null ? d.Produto.Marca.Nome   : null,
+                d.DataCriacao
+            })
+            .ToListAsync();
+
+        var resumo = new ResumoDespesas
+        {
+            TotalEssencial    = despesas.Where(d => d.NomeCategoria == "Essencial").Sum(d => d.Valor),
+            TotalLazer        = despesas.Where(d => d.NomeCategoria == "Lazer").Sum(d => d.Valor),
+            TotalInvestimento = despesas.Where(d => d.NomeCategoria == "Investimento").Sum(d => d.Valor),
+        };
+        resumo.TotalGeral = resumo.TotalEssencial + resumo.TotalLazer + resumo.TotalInvestimento;
+
+        var evolucao = despesas
+            .GroupBy(d => new { d.DataCriacao.Year, d.DataCriacao.Month })
+            .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+            .Select(g => new EvolucaoMensalItem
+            {
+                Ano               = g.Key.Year,
+                Mes               = g.Key.Month,
+                TotalEssencial    = g.Where(d => d.NomeCategoria == "Essencial").Sum(d => d.Valor),
+                TotalLazer        = g.Where(d => d.NomeCategoria == "Lazer").Sum(d => d.Valor),
+                TotalInvestimento = g.Where(d => d.NomeCategoria == "Investimento").Sum(d => d.Valor),
+            })
+            .ToList();
+
+        var topEstabelecimentos = despesas
+            .GroupBy(d => d.NomeEstabelecimento)
+            .Select(g => new RankingItem { Nome = g.Key, Total = g.Sum(d => d.Valor) })
+            .OrderByDescending(r => r.Total)
+            .Take(5)
+            .ToList();
+
+        var topProdutos = despesas
+            .Where(d => d.NomeProduto != null)
+            .GroupBy(d => new { d.NomeProduto, d.NomeMarca })
+            .Select(g => new RankingItem
+            {
+                Nome    = g.Key.NomeProduto!,
+                Detalhe = g.Key.NomeMarca,
+                Total   = g.Sum(d => d.Valor)
+            })
+            .OrderByDescending(r => r.Total)
+            .Take(5)
+            .ToList();
+
+        return Ok(new DashboardResponse
+        {
+            Resumo              = resumo,
+            EvolucaoMensal      = evolucao,
+            TopEstabelecimentos = topEstabelecimentos,
+            TopProdutos         = topProdutos
         });
     }
 
@@ -122,11 +202,15 @@ public class DespesasController(AppDbContext db) : ControllerBase
                 IdEstabelecimento   = d.IdEstabelecimento,
                 NomeEstabelecimento = d.Estabelecimento.Nome,
                 IdProduto           = d.IdProduto,
-                NomeProduto         = d.Produto.Nome,
-                IdMarca             = d.Produto.IdMarca,
-                NomeMarca           = d.Produto.Marca.Nome,
+                NomeProduto         = d.Produto != null ? d.Produto.Nome : null,
+                IdMarca             = d.Produto != null ? d.Produto.IdMarca : (int?)null,
+                NomeMarca           = d.Produto != null ? d.Produto.Marca.Nome : null,
+                IdLinhaProduto      = d.Produto != null ? d.Produto.IdLinhaProduto : (int?)null,
+                NomeLinhaProduto    = d.Produto != null ? d.Produto.LinhaProduto.Nome : null,
                 Descricao           = d.Descricao,
                 Valor               = d.Valor,
+                PrecoGranel         = d.PrecoGranel,
+                UnidadeGranel       = d.UnidadeGranel,
                 DataCriacao         = d.DataCriacao
             })
             .FirstOrDefaultAsync();
@@ -150,6 +234,8 @@ public class DespesasController(AppDbContext db) : ControllerBase
             IdProduto         = req.IdProduto,
             Descricao         = req.Descricao,
             Valor             = req.Valor,
+            PrecoGranel       = req.PrecoGranel,
+            UnidadeGranel     = req.UnidadeGranel,
             DataCriacao       = req.DataCriacao ?? DateTime.UtcNow
         };
 
@@ -176,6 +262,8 @@ public class DespesasController(AppDbContext db) : ControllerBase
         despesa.IdProduto         = req.IdProduto;
         despesa.Descricao         = req.Descricao;
         despesa.Valor             = req.Valor;
+        despesa.PrecoGranel       = req.PrecoGranel;
+        despesa.UnidadeGranel     = req.UnidadeGranel;
         if (req.DataCriacao.HasValue)
             despesa.DataCriacao = req.DataCriacao.Value;
 
@@ -206,7 +294,7 @@ public class DespesasController(AppDbContext db) : ControllerBase
         if (!await db.Estabelecimentos.AnyAsync(e => e.Id == req.IdEstabelecimento))
             return UnprocessableEntity(new { mensagem = "Estabelecimento não encontrado." });
 
-        if (!await db.Produtos.AnyAsync(p => p.Id == req.IdProduto))
+        if (req.IdProduto.HasValue && !await db.Produtos.AnyAsync(p => p.Id == req.IdProduto.Value))
             return UnprocessableEntity(new { mensagem = "Produto não encontrado." });
 
         return null;
@@ -223,11 +311,15 @@ public class DespesasController(AppDbContext db) : ControllerBase
                 IdEstabelecimento   = d.IdEstabelecimento,
                 NomeEstabelecimento = d.Estabelecimento.Nome,
                 IdProduto           = d.IdProduto,
-                NomeProduto         = d.Produto.Nome,
-                IdMarca             = d.Produto.IdMarca,
-                NomeMarca           = d.Produto.Marca.Nome,
+                NomeProduto         = d.Produto != null ? d.Produto.Nome : null,
+                IdMarca             = d.Produto != null ? d.Produto.IdMarca : (int?)null,
+                NomeMarca           = d.Produto != null ? d.Produto.Marca.Nome : null,
+                IdLinhaProduto      = d.Produto != null ? d.Produto.IdLinhaProduto : (int?)null,
+                NomeLinhaProduto    = d.Produto != null ? d.Produto.LinhaProduto.Nome : null,
                 Descricao           = d.Descricao,
                 Valor               = d.Valor,
+                PrecoGranel         = d.PrecoGranel,
+                UnidadeGranel       = d.UnidadeGranel,
                 DataCriacao         = d.DataCriacao
             })
             .FirstAsync();

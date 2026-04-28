@@ -1,0 +1,334 @@
+<div class="pagina">
+  <div class="pagina-cabecalho">
+    <div>
+      <h2>Despesas</h2>
+      <p class="subtitulo">Gerencie e acompanhe seus gastos.</p>
+    </div>
+    <button class="btn-primario" (click)="abrirCriar()">+ Nova Despesa</button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card card-filtros">
+    <button class="btn-filtros" (click)="filtrosAbertos.set(!filtrosAbertos())">
+      <span>🔍 Filtros</span>
+      <span class="seta">{{ filtrosAbertos() ? '▲' : '▼' }}</span>
+    </button>
+
+    @if (filtrosAbertos()) {
+      <form [formGroup]="filtroForm" (ngSubmit)="aplicarFiltros()" class="filtros-grade">
+        <div class="campo">
+          <label>De</label>
+          <input type="date" formControlName="de" />
+        </div>
+        <div class="campo">
+          <label>Até</label>
+          <input type="date" formControlName="ate" />
+        </div>
+        <div class="campo">
+          <label>Categoria</label>
+          <select formControlName="idCategoria">
+            <option [ngValue]="null">Todas</option>
+            @for (cat of categorias(); track cat.id) {
+              <option [ngValue]="cat.id">{{ cat.nome }}</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label>Estabelecimento</label>
+          <select formControlName="idEstabelecimento">
+            <option [ngValue]="null">Todos</option>
+            @for (est of estabelecimentos(); track est.id) {
+              <option [ngValue]="est.id">{{ est.nome }}</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label>Produto</label>
+          <select formControlName="idProduto">
+            <option [ngValue]="null">Todos</option>
+            @for (prod of produtos(); track prod.id) {
+              <option [ngValue]="prod.id">{{ prod.nome }}</option>
+            }
+          </select>
+        </div>
+        <div class="filtros-acoes">
+          <button type="button" class="btn-secundario" (click)="limparFiltros()">Limpar</button>
+          <button type="submit" class="btn-primario">Aplicar</button>
+        </div>
+      </form>
+    }
+  </div>
+
+  <!-- Tabela -->
+  <div class="card">
+    @if (carregando()) {
+      <div class="estado-vazio">Carregando...</div>
+    } @else if (lista().length === 0) {
+      <div class="estado-vazio">Nenhuma despesa encontrada.</div>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Estabelecimento</th>
+            <th>Produto</th>
+            <th>Marca</th>
+            <th>Categoria</th>
+            <th class="col-valor">Valor</th>
+            <th class="col-valor">Preço Granel</th>
+            <th class="col-acoes">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of lista(); track item.id; let par = $even) {
+            <tr [class.par]="par">
+              <td class="col-data">{{ formatarData(item.dataCriacao) }}</td>
+              <td>{{ item.nomeEstabelecimento }}</td>
+              <td>{{ item.nomeProduto ?? '—' }}</td>
+              <td>{{ item.nomeMarca ?? '—' }}</td>
+              <td><span class="badge-categoria" [class]="'cat-' + item.nomeCategoria.toLowerCase()">{{ item.nomeCategoria }}</span></td>
+              <td class="col-valor">{{ formatarValor(item.valor) }}</td>
+              <td class="col-valor">
+                @if (item.precoGranel) {
+                  {{ item.precoGranel | number:'1.3-3':'pt-BR' }} / {{ item.unidadeGranel }}
+                } @else {
+                  —
+                }
+              </td>
+              <td class="col-acoes">
+                <div>
+                  <button class="btn-acao" (click)="abrirEditar(item)" title="Editar">✏️</button>
+                  <button class="btn-acao" (click)="pedirConfirmacaoExclusao(item.id)" title="Excluir">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Paginação -->
+      @if (totalPaginas() > 1) {
+        <div class="paginacao">
+          <span class="paginacao-info">{{ total() }} registros</span>
+          <div class="paginacao-btns">
+            <button [disabled]="paginaAtual === 1" (click)="mudarPagina(paginaAtual - 1)">‹</button>
+            @for (p of paginas; track p) {
+              <button [class.ativo]="p === paginaAtual" (click)="mudarPagina(p)">{{ p }}</button>
+            }
+            <button [disabled]="paginaAtual === totalPaginas()" (click)="mudarPagina(paginaAtual + 1)">›</button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- Modal Formulário -->
+@if (modalAberto()) {
+  <div class="overlay" (click)="fecharModal()">
+    <div class="modal modal-despesa" (click)="$event.stopPropagation()">
+      <div class="modal-cabecalho">
+        <h3>{{ editandoId ? 'Editar' : 'Nova' }} Despesa</h3>
+        <button class="btn-fechar" (click)="fecharModal()">✕</button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="salvar()">
+        <div class="form-grade">
+
+          <div class="campo campo-data">
+            <label>Data e hora</label>
+            <input type="datetime-local" formControlName="dataCriacao" />
+          </div>
+
+          <div class="campo campo-categoria">
+            <label>Categoria</label>
+            <select formControlName="idCategoria">
+              <option [ngValue]="null" disabled>Selecione</option>
+              @for (cat of categorias(); track cat.id) {
+                <option [ngValue]="cat.id">{{ cat.nome }}</option>
+              }
+            </select>
+            @if (form.get('idCategoria')?.invalid && form.get('idCategoria')?.touched) {
+              <span class="erro-campo">Selecione uma categoria.</span>
+            }
+          </div>
+
+          <div class="campo campo-estabelecimento">
+            <label>Estabelecimento</label>
+            <div class="combo-wrapper">
+              <input
+                type="text"
+                class="combo-input"
+                placeholder="Digite para buscar..."
+                [value]="buscaEstabelecimento()"
+                (input)="buscaEstabelecimento.set($any($event.target).value)"
+                (focus)="abrirDropdownEstabelecimento()"
+                (blur)="fecharDropdownEstabelecimento()"
+                autocomplete="off"
+              />
+              @if (dropdownEstabelecimentoAberto()) {
+                <ul class="combo-lista">
+                  @for (est of estabelecimentosFiltrados(); track est.id) {
+                    <li (mousedown)="selecionarEstabelecimento(est)">{{ est.nome }}</li>
+                  } @empty {
+                    <li class="combo-vazio">Nenhum encontrado.</li>
+                  }
+                </ul>
+              }
+            </div>
+            @if (form.get('idEstabelecimento')?.invalid && form.get('idEstabelecimento')?.touched) {
+              <span class="erro-campo">
+                {{ form.get('idEstabelecimento')?.hasError('naoEncontrado')
+                    ? 'Estabelecimento não cadastrado. Selecione um da lista.'
+                    : 'Selecione um estabelecimento.' }}
+              </span>
+            }
+          </div>
+
+          <div class="campo campo-toggle-produto">
+            <label>Produto</label>
+            <button type="button" class="btn-toggle-produto" [class.ativo]="incluirProduto()" (click)="toggleProduto()">
+              <span class="toggle-icone">{{ incluirProduto() ? '✕' : '+' }}</span>
+              {{ incluirProduto() ? 'Remover produto' : 'Adicionar produto' }}
+            </button>
+          </div>
+
+          @if (incluirProduto()) {
+            <div class="campo campo-marca">
+              <label>Marca <span class="label-opcional">(filtra produtos)</span></label>
+              <select formControlName="idMarca">
+                <option [ngValue]="null">Todas as marcas</option>
+                @for (marca of marcas(); track marca.id) {
+                  <option [ngValue]="marca.id">{{ marca.nome }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="campo campo-linha">
+              <label>Linha <span class="label-opcional">(filtra produtos)</span></label>
+              <select formControlName="idLinha" [disabled]="!form.get('idMarca')?.value || linhas().length === 0">
+                <option [ngValue]="null">{{ form.get('idMarca')?.value ? (linhas().length === 0 ? 'Sem linhas' : 'Todas as linhas') : 'Selecione uma marca' }}</option>
+                @for (linha of linhas(); track linha.id) {
+                  <option [ngValue]="linha.id">{{ linha.nome }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="campo campo-produto">
+              <label>Produto</label>
+              <div class="combo-wrapper">
+                <input
+                  type="text"
+                  class="combo-input"
+                  placeholder="Digite para buscar..."
+                  [value]="buscaProduto()"
+                  (input)="buscaProduto.set($any($event.target).value)"
+                  (focus)="abrirDropdownProduto()"
+                  (blur)="fecharDropdownProduto()"
+                  autocomplete="off"
+                />
+                @if (dropdownProdutoAberto()) {
+                  <ul class="combo-lista">
+                    @for (prod of produtosFiltrados(); track prod.id) {
+                      <li (mousedown)="selecionarProduto(prod)">{{ prod.nome }}</li>
+                    } @empty {
+                      <li class="combo-vazio">Nenhum encontrado.</li>
+                    }
+                  </ul>
+                }
+              </div>
+              @if (form.get('idProduto')?.invalid && form.get('idProduto')?.touched) {
+                <span class="erro-campo">Selecione um produto.</span>
+              }
+            </div>
+          }
+
+          <div class="campo campo-valor">
+            <label>Valor (R$)</label>
+            <input type="number" formControlName="valor" placeholder="0,00" min="0.01" step="0.01" />
+            @if (form.get('valor')?.invalid && form.get('valor')?.touched) {
+              <span class="erro-campo">Informe um valor maior que zero.</span>
+            }
+          </div>
+
+          <div class="campo campo-toggle-granel">
+            <label>Preço a Granel <span class="label-opcional">(opcional)</span></label>
+            <button type="button" class="btn-toggle-produto" [class.ativo]="incluirGranel()" (click)="toggleGranel()">
+              <span class="toggle-icone">{{ incluirGranel() ? '✕' : '+' }}</span>
+              {{ incluirGranel() ? 'Remover preço a granel' : 'Informar preço a granel' }}
+            </button>
+          </div>
+
+          @if (incluirGranel()) {
+            <div class="campo campo-preco-granel">
+              <label>Preço / unidade</label>
+              <input type="number" formControlName="precoGranel" placeholder="0,000" min="0.001" step="0.001" />
+              @if (form.get('precoGranel')?.invalid && form.get('precoGranel')?.touched) {
+                <span class="erro-campo">Informe um preço maior que zero.</span>
+              }
+            </div>
+
+            <div class="campo campo-unidade-granel">
+              <label>Unidade</label>
+              <select formControlName="unidadeGranel">
+                <option value="Kg">Kg</option>
+                <option value="L">L</option>
+                <option value="Un">Un</option>
+              </select>
+            </div>
+          }
+
+          <div class="campo campo-descricao">
+            <label>Descrição <span class="label-opcional">(opcional)</span></label>
+            <input type="text" formControlName="descricao" placeholder="Observação sobre a despesa" />
+          </div>
+
+        </div>
+
+        @if (erro()) {
+          <div class="erro-form">{{ erro() }}</div>
+        }
+
+        <div class="modal-rodape">
+          <button type="button" class="btn-secundario" (click)="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-primario" [disabled]="salvando()">
+            {{ salvando() ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal Cadastro de Estabelecimento -->
+@if (modalCadastroEstabelecimentoAberto()) {
+  <div class="overlay">
+    <div class="modal modal-confirmacao" (click)="$event.stopPropagation()">
+      <h3>Estabelecimento não encontrado</h3>
+      <p>
+        O estabelecimento <strong>"{{ nomeEstabelecimentoPendente() }}"</strong> não está cadastrado.
+        Deseja cadastrá-lo agora?
+      </p>
+      <div class="modal-rodape">
+        <button class="btn-secundario" (click)="recusarCadastroEstabelecimento()" [disabled]="cadastrandoEstabelecimento()">Não, voltar</button>
+        <button class="btn-primario" (click)="confirmarCadastroEstabelecimento()" [disabled]="cadastrandoEstabelecimento()">
+          {{ cadastrandoEstabelecimento() ? 'Cadastrando...' : 'Sim, cadastrar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal Confirmação de Exclusão -->
+@if (confirmarExclusaoId() !== null) {
+  <div class="overlay" (click)="cancelarExclusao()">
+    <div class="modal modal-confirmacao" (click)="$event.stopPropagation()">
+      <h3>Confirmar exclusão</h3>
+      <p>Deseja realmente excluir esta despesa? Esta ação não pode ser desfeita.</p>
+      <div class="modal-rodape">
+        <button class="btn-secundario" (click)="cancelarExclusao()">Cancelar</button>
+        <button class="btn-perigo" (click)="confirmarExclusao()">Excluir</button>
+      </div>
+    </div>
+  </div>
+}

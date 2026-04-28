@@ -8,8 +8,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<Estabelecimento> Estabelecimentos => Set<Estabelecimento>();
-    public DbSet<Marca> Marcas => Set<Marca>();
-    public DbSet<Produto> Produtos => Set<Produto>();
+    public DbSet<Marca>         Marcas        => Set<Marca>();
+    public DbSet<LinhaProduto>  LinhasProduto => Set<LinhaProduto>();
+    public DbSet<Produto>       Produtos      => Set<Produto>();
     public DbSet<Despesa> Despesas => Set<Despesa>();
 
     protected override void OnModelCreating(ModelBuilder model)
@@ -40,11 +41,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(m => m.Nome).IsUnique();
         });
 
+        model.Entity<LinhaProduto>(e =>
+        {
+            e.HasIndex(lp => new { lp.IdMarca, lp.Nome }).IsUnique();
+
+            e.HasOne(lp => lp.Marca)
+             .WithMany(m => m.LinhasProduto)
+             .HasForeignKey(lp => lp.IdMarca);
+        });
+
         model.Entity<Produto>(e =>
         {
             e.HasOne(p => p.Marca)
              .WithMany(m => m.Produtos)
-             .HasForeignKey(p => p.IdMarca);
+             .HasForeignKey(p => p.IdMarca)
+             .IsRequired(false);
+
+            e.HasOne(p => p.LinhaProduto)
+             .WithMany(lp => lp.Produtos)
+             .HasForeignKey(p => p.IdLinhaProduto)
+             .IsRequired(false);
         });
 
         model.Entity<Despesa>(e =>
