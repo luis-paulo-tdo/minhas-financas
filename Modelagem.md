@@ -128,6 +128,17 @@ CREATE INDEX IX_Despesas_DataCriacao        ON Despesas (DataCriacao);
 
 ---
 
+### `Servicos`
+
+| Coluna | Tipo    | Restrições       |
+|--------|---------|------------------|
+| `Id`   | INTEGER | PK AUTOINCREMENT |
+| `Nome` | TEXT    | NOT NULL         |
+
+**Índices:** `UNIQUE (Nome)`
+
+---
+
 ## Diferenças em relação ao CLAUDE.md
 
 O esquema atual do código diverge da documentação em `CLAUDE.md` nos seguintes pontos:
@@ -139,3 +150,4 @@ O esquema atual do código diverge da documentação em `CLAUDE.md` nos seguinte
 | `Despesas.IdProduto`   | NOT NULL                   | NULL (opcional)                           |
 | `Despesas.PrecoGranel` | Não documentada            | Existe — REAL nullable                    |
 | `Despesas.UnidadeGranel`| Não documentada           | Existe — TEXT nullable                    |
+| Tabela `Servicos`      | Não documentada            | Existe — Id e Nome com UNIQUE             |

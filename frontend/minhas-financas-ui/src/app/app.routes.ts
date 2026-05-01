@@ -13,6 +13,7 @@ export const routes: Routes = [
       { path: 'marcas', loadComponent: () => import('./features/marcas/marcas.component').then(m => m.MarcasComponent) },
       { path: 'produtos', loadComponent: () => import('./features/produtos/produtos.component').then(m => m.ProdutosComponent) },
       { path: 'linhas', loadComponent: () => import('./features/linhas/linhas.component').then(m => m.LinhasComponent) },
+      { path: 'servicos', loadComponent: () => import('./features/servicos/servicos.component').then(m => m.ServicosComponent) },
       { path: 'painel', loadComponent: () => import('./features/painel/painel.component').then(m => m.PainelComponent) },
       { path: '', redirectTo: 'painel', pathMatch: 'full' }
     ]
