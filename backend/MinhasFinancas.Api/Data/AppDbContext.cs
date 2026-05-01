@@ -11,7 +11,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Marca>         Marcas        => Set<Marca>();
     public DbSet<LinhaProduto>  LinhasProduto => Set<LinhaProduto>();
     public DbSet<Produto>       Produtos      => Set<Produto>();
-    public DbSet<Despesa> Despesas => Set<Despesa>();
+    public DbSet<Despesa>  Despesas  => Set<Despesa>();
+    public DbSet<Servico>  Servicos  => Set<Servico>();
 
     protected override void OnModelCreating(ModelBuilder model)
     {
@@ -89,6 +90,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(d => d.IdEstabelecimento);
             e.HasIndex(d => d.IdProduto);
             e.HasIndex(d => d.DataCriacao);
+        });
+
+        model.Entity<Servico>(e =>
+        {
+            e.HasIndex(s => s.Nome).IsUnique();
         });
     }
 }
