@@ -11,6 +11,7 @@ public class DespesaRequest
     public int IdEstabelecimento { get; set; }
 
     public int? IdProduto { get; set; }
+    public int? IdServico { get; set; }
 
     public string? Descricao { get; set; }
 

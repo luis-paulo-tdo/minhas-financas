@@ -65,6 +65,8 @@ public class DespesasController(AppDbContext db) : ControllerBase
                 NomeMarca           = d.Produto != null ? d.Produto.Marca.Nome : null,
                 IdLinhaProduto      = d.Produto != null ? d.Produto.IdLinhaProduto : (int?)null,
                 NomeLinhaProduto    = d.Produto != null ? d.Produto.LinhaProduto.Nome : null,
+                IdServico           = d.IdServico,
+                NomeServico         = d.Servico != null ? d.Servico.Nome : null,
                 Descricao           = d.Descricao,
                 Valor               = d.Valor,
                 PrecoGranel         = d.PrecoGranel,
@@ -207,6 +209,8 @@ public class DespesasController(AppDbContext db) : ControllerBase
                 NomeMarca           = d.Produto != null ? d.Produto.Marca.Nome : null,
                 IdLinhaProduto      = d.Produto != null ? d.Produto.IdLinhaProduto : (int?)null,
                 NomeLinhaProduto    = d.Produto != null ? d.Produto.LinhaProduto.Nome : null,
+                IdServico           = d.IdServico,
+                NomeServico         = d.Servico != null ? d.Servico.Nome : null,
                 Descricao           = d.Descricao,
                 Valor               = d.Valor,
                 PrecoGranel         = d.PrecoGranel,
@@ -232,6 +236,7 @@ public class DespesasController(AppDbContext db) : ControllerBase
             IdCategoria       = req.IdCategoria,
             IdEstabelecimento = req.IdEstabelecimento,
             IdProduto         = req.IdProduto,
+            IdServico         = req.IdServico,
             Descricao         = req.Descricao,
             Valor             = req.Valor,
             PrecoGranel       = req.PrecoGranel,
@@ -260,6 +265,7 @@ public class DespesasController(AppDbContext db) : ControllerBase
         despesa.IdCategoria       = req.IdCategoria;
         despesa.IdEstabelecimento = req.IdEstabelecimento;
         despesa.IdProduto         = req.IdProduto;
+        despesa.IdServico         = req.IdServico;
         despesa.Descricao         = req.Descricao;
         despesa.Valor             = req.Valor;
         despesa.PrecoGranel       = req.PrecoGranel;
@@ -294,8 +300,14 @@ public class DespesasController(AppDbContext db) : ControllerBase
         if (!await db.Estabelecimentos.AnyAsync(e => e.Id == req.IdEstabelecimento))
             return UnprocessableEntity(new { mensagem = "Estabelecimento não encontrado." });
 
+        if (req.IdProduto.HasValue && req.IdServico.HasValue)
+            return UnprocessableEntity(new { mensagem = "Informe produto ou serviço, não ambos." });
+
         if (req.IdProduto.HasValue && !await db.Produtos.AnyAsync(p => p.Id == req.IdProduto.Value))
             return UnprocessableEntity(new { mensagem = "Produto não encontrado." });
+
+        if (req.IdServico.HasValue && !await db.Servicos.AnyAsync(s => s.Id == req.IdServico.Value))
+            return UnprocessableEntity(new { mensagem = "Serviço não encontrado." });
 
         return null;
     }
@@ -316,6 +328,8 @@ public class DespesasController(AppDbContext db) : ControllerBase
                 NomeMarca           = d.Produto != null ? d.Produto.Marca.Nome : null,
                 IdLinhaProduto      = d.Produto != null ? d.Produto.IdLinhaProduto : (int?)null,
                 NomeLinhaProduto    = d.Produto != null ? d.Produto.LinhaProduto.Nome : null,
+                IdServico           = d.IdServico,
+                NomeServico         = d.Servico != null ? d.Servico.Nome : null,
                 Descricao           = d.Descricao,
                 Valor               = d.Valor,
                 PrecoGranel         = d.PrecoGranel,

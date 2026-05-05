@@ -8,12 +8,16 @@ import { EstabelecimentoService } from '../../core/services/estabelecimento.serv
 import { MarcaService } from '../../core/services/marca.service';
 import { ProdutoService } from '../../core/services/produto.service';
 import { LinhaProdutoService } from '../../core/services/linha-produto.service';
+import { ServicoService } from '../../core/services/servico.service';
 import { Despesa, FiltrosDespesa } from '../../core/models/despesa.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { Estabelecimento } from '../../core/models/estabelecimento.model';
 import { Marca } from '../../core/models/marca.model';
 import { Produto } from '../../core/models/produto.model';
 import { LinhaProduto } from '../../core/models/linha-produto.model';
+import { Servico } from '../../core/models/servico.model';
+
+type TipoItem = '' | 'produto' | 'granel' | 'servico';
 
 @Component({
   selector: 'app-despesas',
@@ -38,23 +42,23 @@ export class DespesasComponent implements OnInit {
   readonly marcas           = signal<Marca[]>([]);
   readonly linhas           = signal<LinhaProduto[]>([]);
   readonly produtos         = signal<Produto[]>([]);
+  readonly servicos         = signal<Servico[]>([]);
 
-  readonly buscaEstabelecimento                  = signal('');
-  readonly dropdownEstabelecimentoAberto         = signal(false);
-  readonly modalCadastroEstabelecimentoAberto    = signal(false);
-  readonly nomeEstabelecimentoPendente           = signal('');
-  readonly cadastrandoEstabelecimento            = signal(false);
-  readonly estabelecimentosFiltrados             = computed(() => {
+  readonly buscaEstabelecimento               = signal('');
+  readonly dropdownEstabelecimentoAberto      = signal(false);
+  readonly modalCadastroEstabelecimentoAberto = signal(false);
+  readonly nomeEstabelecimentoPendente        = signal('');
+  readonly cadastrandoEstabelecimento         = signal(false);
+  readonly estabelecimentosFiltrados          = computed(() => {
     const termo = this.buscaEstabelecimento().toLowerCase().trim();
     if (!termo) return this.estabelecimentos();
     return this.estabelecimentos().filter(e => e.nome.toLowerCase().includes(termo));
   });
 
-  readonly incluirProduto        = signal(false);
-  readonly incluirGranel         = signal(false);
-  readonly buscaProduto          = signal('');
+  readonly tipoItem          = signal<TipoItem>('');
+  readonly buscaProduto      = signal('');
   readonly dropdownProdutoAberto = signal(false);
-  readonly produtosFiltrados     = computed(() => {
+  readonly produtosFiltrados = computed(() => {
     const termo = this.buscaProduto().toLowerCase().trim();
     if (!termo) return this.produtos();
     return this.produtos().filter(p => p.nome.toLowerCase().includes(termo));
@@ -75,6 +79,7 @@ export class DespesasComponent implements OnInit {
     private marcaService: MarcaService,
     private produtoService: ProdutoService,
     private linhaService: LinhaProdutoService,
+    private servicoService: ServicoService,
     private fb: FormBuilder
   ) {
     this.form = this.fb.group({
@@ -83,6 +88,7 @@ export class DespesasComponent implements OnInit {
       idMarca:           [null],
       idLinha:           [null],
       idProduto:         [null],
+      idServico:         [null],
       descricao:         [''],
       valor:             [null, [Validators.required, Validators.min(0.01)]],
       precoGranel:       [null],
@@ -99,6 +105,7 @@ export class DespesasComponent implements OnInit {
     });
 
     this.form.get('idMarca')!.valueChanges.subscribe(idMarca => {
+      if (this.tipoItem() !== 'produto' && this.tipoItem() !== 'granel') return;
       this.form.get('idLinha')!.setValue(null);
       this.form.get('idProduto')!.setValue(null);
       this.buscaProduto.set('');
@@ -110,6 +117,7 @@ export class DespesasComponent implements OnInit {
     });
 
     this.form.get('idLinha')!.valueChanges.subscribe(idLinha => {
+      if (this.tipoItem() !== 'produto' && this.tipoItem() !== 'granel') return;
       this.form.get('idProduto')!.setValue(null);
       this.buscaProduto.set('');
       const idMarca = this.form.get('idMarca')?.value ?? undefined;
@@ -122,6 +130,7 @@ export class DespesasComponent implements OnInit {
     this.categoriaService.listar().subscribe(c => this.categorias.set(c));
     this.estabelecimentoService.listar().subscribe(e => this.estabelecimentos.set(e));
     this.marcaService.listar().subscribe(m => this.marcas.set(m));
+    this.servicoService.listar().subscribe(s => this.servicos.set(s));
     this.carregarProdutos();
   }
 
@@ -171,49 +180,60 @@ export class DespesasComponent implements OnInit {
     return Array.from({ length: this.totalPaginas() }, (_, i) => i + 1);
   }
 
-  toggleGranel(): void {
-    const ativar = !this.incluirGranel();
-    this.incluirGranel.set(ativar);
-    const ctrl = this.form.get('precoGranel')!;
-    if (ativar) {
-      ctrl.setValidators([Validators.required, Validators.min(0.001)]);
-    } else {
-      ctrl.clearValidators();
-      ctrl.setValue(null);
-      ctrl.setErrors(null);
-      this.form.get('unidadeGranel')!.setValue('Kg');
-    }
-    ctrl.updateValueAndValidity();
-  }
+  mudarTipoItem(tipo: TipoItem): void {
+    this.tipoItem.set(tipo);
 
-  toggleProduto(): void {
-    const ativar = !this.incluirProduto();
-    this.incluirProduto.set(ativar);
-    const ctrl = this.form.get('idProduto')!;
-    if (ativar) {
-      ctrl.setValidators(Validators.required);
-    } else {
-      ctrl.clearValidators();
-      ctrl.setValue(null);
-      ctrl.setErrors(null);
+    const produtoCtrl = this.form.get('idProduto')!;
+    const granelCtrl  = this.form.get('precoGranel')!;
+    const servicoCtrl = this.form.get('idServico')!;
+
+    if (tipo !== 'produto' && tipo !== 'granel') {
+      produtoCtrl.clearValidators();
+      produtoCtrl.setValue(null);
+      produtoCtrl.setErrors(null);
+      produtoCtrl.updateValueAndValidity();
       this.form.get('idMarca')!.setValue(null);
+      this.form.get('idLinha')!.setValue(null);
       this.buscaProduto.set('');
       this.dropdownProdutoAberto.set(false);
+      this.linhas.set([]);
+    } else {
+      produtoCtrl.setValidators(Validators.required);
+      produtoCtrl.updateValueAndValidity();
     }
-    ctrl.updateValueAndValidity();
+
+    if (tipo !== 'granel') {
+      granelCtrl.clearValidators();
+      granelCtrl.setValue(null);
+      granelCtrl.setErrors(null);
+      granelCtrl.updateValueAndValidity();
+    } else {
+      granelCtrl.setValidators([Validators.required, Validators.min(0.001)]);
+      granelCtrl.updateValueAndValidity();
+      this.form.get('unidadeGranel')!.setValue('Kg');
+    }
+
+    if (tipo !== 'servico') {
+      servicoCtrl.clearValidators();
+      servicoCtrl.setValue(null);
+      servicoCtrl.setErrors(null);
+      servicoCtrl.updateValueAndValidity();
+    } else {
+      servicoCtrl.setValidators(Validators.required);
+      servicoCtrl.updateValueAndValidity();
+    }
   }
 
   abrirCriar(): void {
     this.editandoId = null;
     this.erro.set('');
-    this.incluirProduto.set(false);
-    this.incluirGranel.set(false);
+    this.tipoItem.set('');
     this.linhas.set([]);
     this.form.reset({ dataCriacao: this.agoraLocal(), unidadeGranel: 'Kg' });
-    this.form.get('idProduto')!.clearValidators();
-    this.form.get('idProduto')!.updateValueAndValidity();
-    this.form.get('precoGranel')!.clearValidators();
-    this.form.get('precoGranel')!.updateValueAndValidity();
+    ['idProduto', 'precoGranel', 'idServico'].forEach(ctrl => {
+      this.form.get(ctrl)!.clearValidators();
+      this.form.get(ctrl)!.updateValueAndValidity();
+    });
     this.buscaEstabelecimento.set('');
     this.buscaProduto.set('');
     this.dropdownEstabelecimentoAberto.set(false);
@@ -228,26 +248,43 @@ export class DespesasComponent implements OnInit {
     this.dropdownEstabelecimentoAberto.set(false);
     this.dropdownProdutoAberto.set(false);
 
-    const temProduto = !!item.idProduto;
-    const temGranel  = !!item.precoGranel;
-    this.incluirProduto.set(temProduto);
-    this.incluirGranel.set(temGranel);
+    let tipo: TipoItem = '';
+    if (item.idServico) {
+      tipo = 'servico';
+    } else if (item.idProduto && item.precoGranel) {
+      tipo = 'granel';
+    } else if (item.idProduto) {
+      tipo = 'produto';
+    }
+    this.tipoItem.set(tipo);
 
-    const ctrlProduto = this.form.get('idProduto')!;
-    if (temProduto) { ctrlProduto.setValidators(Validators.required); }
-    else            { ctrlProduto.clearValidators(); }
-    ctrlProduto.updateValueAndValidity();
+    const produtoCtrl = this.form.get('idProduto')!;
+    const granelCtrl  = this.form.get('precoGranel')!;
+    const servicoCtrl = this.form.get('idServico')!;
 
-    const ctrlGranel = this.form.get('precoGranel')!;
-    if (temGranel) { ctrlGranel.setValidators([Validators.required, Validators.min(0.001)]); }
-    else           { ctrlGranel.clearValidators(); }
-    ctrlGranel.updateValueAndValidity();
+    produtoCtrl.clearValidators();
+    granelCtrl.clearValidators();
+    servicoCtrl.clearValidators();
+
+    if (tipo === 'produto' || tipo === 'granel') {
+      produtoCtrl.setValidators(Validators.required);
+    }
+    if (tipo === 'granel') {
+      granelCtrl.setValidators([Validators.required, Validators.min(0.001)]);
+    }
+    if (tipo === 'servico') {
+      servicoCtrl.setValidators(Validators.required);
+    }
+
+    produtoCtrl.updateValueAndValidity();
+    granelCtrl.updateValueAndValidity();
+    servicoCtrl.updateValueAndValidity();
 
     this.linhas.set([]);
-    if (temProduto && item.idMarca) {
+    if ((tipo === 'produto' || tipo === 'granel') && item.idMarca) {
       this.linhaService.listar(undefined, item.idMarca).subscribe(l => this.linhas.set(l));
       this.carregarProdutos(item.idMarca, item.idLinhaProduto ?? undefined);
-    } else if (temProduto) {
+    } else if (tipo === 'produto' || tipo === 'granel') {
       this.carregarProdutos();
     }
 
@@ -258,6 +295,7 @@ export class DespesasComponent implements OnInit {
         idMarca:           item.idMarca ?? null,
         idLinha:           item.idLinhaProduto ?? null,
         idProduto:         item.idProduto ?? null,
+        idServico:         item.idServico ?? null,
         descricao:         item.descricao ?? '',
         valor:             item.valor,
         precoGranel:       item.precoGranel ?? null,
@@ -283,15 +321,17 @@ export class DespesasComponent implements OnInit {
     this.salvando.set(true);
     this.erro.set('');
 
-    const v = this.form.value;
+    const v    = this.form.value;
+    const tipo = this.tipoItem();
     const req = {
       idCategoria:       Number(v.idCategoria),
       idEstabelecimento: Number(v.idEstabelecimento),
-      idProduto:         v.idProduto ? Number(v.idProduto) : undefined,
+      idProduto:         (tipo === 'produto' || tipo === 'granel') && v.idProduto ? Number(v.idProduto) : undefined,
+      idServico:         tipo === 'servico' && v.idServico ? Number(v.idServico) : undefined,
       descricao:         v.descricao || undefined,
       valor:             Number(v.valor),
-      precoGranel:       this.incluirGranel() && v.precoGranel ? Number(v.precoGranel) : undefined,
-      unidadeGranel:     this.incluirGranel() && v.precoGranel ? v.unidadeGranel : undefined,
+      precoGranel:       tipo === 'granel' && v.precoGranel ? Number(v.precoGranel) : undefined,
+      unidadeGranel:     tipo === 'granel' && v.precoGranel ? v.unidadeGranel : undefined,
       dataCriacao:       v.dataCriacao ? new Date(v.dataCriacao).toISOString() : undefined
     };
 
@@ -351,7 +391,6 @@ export class DespesasComponent implements OnInit {
       const texto = this.buscaEstabelecimento().trim();
       if (!texto) return;
 
-      // texto digitado não corresponde a nenhum item selecionado — oferecer cadastro
       this.nomeEstabelecimentoPendente.set(texto);
       this.modalCadastroEstabelecimentoAberto.set(true);
     }, 150);
@@ -368,7 +407,6 @@ export class DespesasComponent implements OnInit {
         this.cadastrandoEstabelecimento.set(false);
       },
       error: (err: HttpErrorResponse) => {
-        // se já existe com este nome, busca na lista e seleciona
         if (err.status === 409) {
           this.estabelecimentoService.listar().subscribe(lista => {
             this.estabelecimentos.set(lista);

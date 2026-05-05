@@ -123,45 +123,25 @@
   .campo-data            { grid-column: 1; }
   .campo-categoria       { grid-column: 2; }
   .campo-estabelecimento { grid-column: 1 / -1; }
-  .campo-toggle-produto  { grid-column: 1 / -1; }
+  .campo-tipo-item       { grid-column: 1 / -1; }
   .campo-marca           { grid-column: 1; }
   .campo-linha           { grid-column: 2; }
   .campo-produto         { grid-column: 1 / -1; }
-  .campo-valor           { grid-column: 1; }
-  .campo-toggle-granel   { grid-column: 1 / -1; }
   .campo-preco-granel    { grid-column: 1; }
   .campo-unidade-granel  { grid-column: 2; }
+  .campo-servico         { grid-column: 1 / -1; }
+  .campo-valor           { grid-column: 1; }
   .campo-descricao       { grid-column: 1 / -1; }
 }
 
-.btn-toggle-produto {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 16px;
-  border: 1.5px dashed #c4b5fd;
-  border-radius: 8px;
-  background: #faf5ff;
-  color: #6d28d9;
-  font-size: 13px;
+.badge-servico {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 12px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover { background: #ede9fe; border-color: #a78bfa; }
-
-  &.ativo {
-    background: #fff1f2;
-    border-color: #fca5a5;
-    color: #b91c1c;
-
-    &:hover { background: #fee2e2; border-color: #f87171; }
-  }
-
-  .toggle-icone {
-    font-size: 14px;
-    font-style: normal;
-  }
+  background: #f3e8ff;
+  color: #6d28d9;
 }
 
 .label-opcional {

@@ -13,6 +13,8 @@ public class DespesaResponse
     public string?  NomeMarca           { get; set; }
     public int?     IdLinhaProduto      { get; set; }
     public string?  NomeLinhaProduto    { get; set; }
+    public int?     IdServico           { get; set; }
+    public string?  NomeServico         { get; set; }
     public string?  Descricao           { get; set; }
     public decimal  Valor               { get; set; }
     public decimal? PrecoGranel         { get; set; }

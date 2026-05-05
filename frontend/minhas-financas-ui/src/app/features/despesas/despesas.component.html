@@ -71,7 +71,7 @@
           <tr>
             <th>Data</th>
             <th>Estabelecimento</th>
-            <th>Produto</th>
+            <th>Item</th>
             <th>Marca</th>
             <th>Categoria</th>
             <th class="col-valor">Valor</th>
@@ -84,7 +84,15 @@
             <tr [class.par]="par">
               <td class="col-data">{{ formatarData(item.dataCriacao) }}</td>
               <td>{{ item.nomeEstabelecimento }}</td>
-              <td>{{ item.nomeProduto ?? '—' }}</td>
+              <td>
+                @if (item.nomeProduto) {
+                  {{ item.nomeProduto }}
+                } @else if (item.nomeServico) {
+                  <span class="badge-servico">{{ item.nomeServico }}</span>
+                } @else {
+                  —
+                }
+              </td>
               <td>{{ item.nomeMarca ?? '—' }}</td>
               <td><span class="badge-categoria" [class]="'cat-' + item.nomeCategoria.toLowerCase()">{{ item.nomeCategoria }}</span></td>
               <td class="col-valor">{{ formatarValor(item.valor) }}</td>
@@ -185,15 +193,19 @@
             }
           </div>
 
-          <div class="campo campo-toggle-produto">
-            <label>Produto</label>
-            <button type="button" class="btn-toggle-produto" [class.ativo]="incluirProduto()" (click)="toggleProduto()">
-              <span class="toggle-icone">{{ incluirProduto() ? '✕' : '+' }}</span>
-              {{ incluirProduto() ? 'Remover produto' : 'Adicionar produto' }}
-            </button>
+          <!-- Seletor de tipo de item -->
+          <div class="campo campo-tipo-item">
+            <label>Tipo de item <span class="label-opcional">(opcional)</span></label>
+            <select (change)="mudarTipoItem($any($event.target).value)">
+              <option value="" [selected]="tipoItem() === ''">Nenhum</option>
+              <option value="produto" [selected]="tipoItem() === 'produto'">Produto</option>
+              <option value="granel" [selected]="tipoItem() === 'granel'">Granel</option>
+              <option value="servico" [selected]="tipoItem() === 'servico'">Serviço</option>
+            </select>
           </div>
 
-          @if (incluirProduto()) {
+          <!-- Campos de Produto / Granel -->
+          @if (tipoItem() === 'produto' || tipoItem() === 'granel') {
             <div class="campo campo-marca">
               <label>Marca <span class="label-opcional">(filtra produtos)</span></label>
               <select formControlName="idMarca">
@@ -243,23 +255,8 @@
             </div>
           }
 
-          <div class="campo campo-valor">
-            <label>Valor (R$)</label>
-            <input type="number" formControlName="valor" placeholder="0,00" min="0.01" step="0.01" />
-            @if (form.get('valor')?.invalid && form.get('valor')?.touched) {
-              <span class="erro-campo">Informe um valor maior que zero.</span>
-            }
-          </div>
-
-          <div class="campo campo-toggle-granel">
-            <label>Preço a Granel <span class="label-opcional">(opcional)</span></label>
-            <button type="button" class="btn-toggle-produto" [class.ativo]="incluirGranel()" (click)="toggleGranel()">
-              <span class="toggle-icone">{{ incluirGranel() ? '✕' : '+' }}</span>
-              {{ incluirGranel() ? 'Remover preço a granel' : 'Informar preço a granel' }}
-            </button>
-          </div>
-
-          @if (incluirGranel()) {
+          <!-- Campos de Granel -->
+          @if (tipoItem() === 'granel') {
             <div class="campo campo-preco-granel">
               <label>Preço / unidade</label>
               <input type="number" formControlName="precoGranel" placeholder="0,000" min="0.001" step="0.001" />
@@ -277,6 +274,30 @@
               </select>
             </div>
           }
+
+          <!-- Campo de Serviço -->
+          @if (tipoItem() === 'servico') {
+            <div class="campo campo-servico">
+              <label>Serviço</label>
+              <select formControlName="idServico">
+                <option [ngValue]="null" disabled>Selecione</option>
+                @for (serv of servicos(); track serv.id) {
+                  <option [ngValue]="serv.id">{{ serv.nome }}</option>
+                }
+              </select>
+              @if (form.get('idServico')?.invalid && form.get('idServico')?.touched) {
+                <span class="erro-campo">Selecione um serviço.</span>
+              }
+            </div>
+          }
+
+          <div class="campo campo-valor">
+            <label>Valor (R$)</label>
+            <input type="number" formControlName="valor" placeholder="0,00" min="0.01" step="0.01" />
+            @if (form.get('valor')?.invalid && form.get('valor')?.touched) {
+              <span class="erro-campo">Informe um valor maior que zero.</span>
+            }
+          </div>
 
           <div class="campo campo-descricao">
             <label>Descrição <span class="label-opcional">(opcional)</span></label>

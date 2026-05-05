@@ -7,6 +7,7 @@ public class Despesa
     public int IdCategoria { get; set; }
     public int IdEstabelecimento { get; set; }
     public int? IdProduto { get; set; }
+    public int? IdServico { get; set; }
     public string? Descricao { get; set; }
     public decimal Valor { get; set; }
     public decimal? PrecoGranel { get; set; }
@@ -16,5 +17,6 @@ public class Despesa
     public Usuario Usuario { get; set; } = null!;
     public Categoria Categoria { get; set; } = null!;
     public Estabelecimento Estabelecimento { get; set; } = null!;
-    public Produto? Produto { get; set; }
+    public Produto?  Produto  { get; set; }
+    public Servico?  Servico  { get; set; }
 }

@@ -10,6 +10,8 @@ export interface Despesa {
   nomeMarca?: string;
   idLinhaProduto?: number;
   nomeLinhaProduto?: string;
+  idServico?: number;
+  nomeServico?: string;
   descricao?: string;
   valor: number;
   precoGranel?: number;
@@ -21,6 +23,7 @@ export interface DespesaRequest {
   idCategoria: number;
   idEstabelecimento: number;
   idProduto?: number;
+  idServico?: number;
   descricao?: string;
   valor: number;
   precoGranel?: number;

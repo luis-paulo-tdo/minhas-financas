@@ -85,6 +85,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
              .WithMany(p => p.Despesas)
              .HasForeignKey(d => d.IdProduto);
 
+            e.HasOne(d => d.Servico)
+             .WithMany()
+             .HasForeignKey(d => d.IdServico)
+             .IsRequired(false);
+
             e.HasIndex(d => d.IdUsuario);
             e.HasIndex(d => d.IdCategoria);
             e.HasIndex(d => d.IdEstabelecimento);
