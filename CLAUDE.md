@@ -52,9 +52,12 @@ Usuarios
 | `IdUsuario`        | INTEGER | NOT NULL, FK → Usuarios             |
 | `IdCategoria`      | INTEGER | NOT NULL, FK → Categorias           |
 | `IdEstabelecimento`| INTEGER | NOT NULL, FK → Estabelecimentos     |
-| `IdProduto`        | INTEGER | NOT NULL, FK → Produtos             |
+| `IdProduto`        | INTEGER | NULL, FK → Produtos                 |
+| `IdServico`        | INTEGER | NULL, FK → Servicos                 |
 | `Descricao`        | TEXT    | NULL                                |
 | `Valor`            | REAL    | NOT NULL                            |
+| `PrecoGranel`      | REAL    | NULL                                |
+| `UnidadeGranel`    | TEXT    | NULL                                |
 | `DataCriacao`      | TEXT    | NOT NULL DEFAULT (datetime('now'))  |
 
 ### Tabela: `Categorias`
